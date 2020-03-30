@@ -1,14 +1,25 @@
-# Finanzen-Fundamentals
-Finanzen-Fundamentals is a Python package that can be used to retrieve fundamentals of stocks. The data is fetched from [finanzen.net](https://www.finanzen.net), a German language financial news site. Note that the api is English but all data will be returned in German.
+# finanzen-crawler-objectified
+Finanzen-Fundamentals is a Python package that can be used to retrieve fundamentals of stocks. The data is fetched 
+from [finanzen.net](https://www.finanzen.net), a German language financial news site. Note that the api is English 
+but all data will be returned in German.
 
+This implementation is derived from Joshuas Hruziks finanzen-fundamentals and implements the functions in an and object oriented way.
+ 
 # Installation
-You can easily install finanzen-fundamentals via pip: `pip install finanzen-fundamentals`
+This module can currently not be found on PyPi or any other python repository. 
+
+To use the module check it out into your project. 
+
+`git clone -b objectified https://github.com/backster82/finanzen-crawler.git`
 
 If you choose to download the source code, make sure that you have the following dependencies installed:
 * requests
-* BeautifulSoup
+* numpy 
+* pandas 
 * lxml
-You can install all of them by running: `pip install requests BeautifulSoup lxml`.
+* time 
+
+You can install all of them by running: `pip install requests lxml numpy pandas time`.
 
 # Usage
 ## Import
@@ -16,28 +27,71 @@ After you successfully installed the package, you can include it in your project
 
 ```import finanzen_fundamentals```
 
-## Retrieve Fundamentals
-You can retrieve the fundamentals of a single stock by running: 
+## The stock.Stock \_\_init__ function 
 
-```bmw_fundamentals = get_fundamentals("bmw")```
+Init expects as first value the stock name as it is used by finanzen.net. German Telekom is for ex. listed as deutsche_telekom
+On init fundamentals, estimations and current stock quotes are crawled and stores into object members.
 
-This will fetch the fundamentals of BMW and save it into a dictionary called bmw_fundamentals.
-bmw_fundamentals will have the following keys:
-* Quotes
-* Key Ratios
-* Income Statement
-* Balance Sheet
-* Other
+The object can be initialized with an stock market as optional parameter exchange. 
+The default is TGT for Tradegate. 
+To lookup the values for exchange see statics.py 
 
-The values for those keys will be variables, holding a year:value dictionary. If no data can be found, the value will be None.
-You can also fetch estimates for expected values by using:
+So for German Telekom the stock object instantiation on exchange Frankfurt Stock Exchange would look like this: 
+```stock = finanzen_fundamentals.stock.Stock("deutsche_telekom", exchange="FSE")```
 
-```bmw_estimates = stocks.get_estimates("bmw")```
+If your unsure what the correct value for the stock name is, see chapter #Search Stock
 
-This will save estimates for the most important key metrics if available. The resulting dictionary will hold variable names as keys and a year:value dictionary as values.
+## Fundamentals
+### Get fundamentals 
+You can retrieve the fundamentals from an given stock.Stock object by calling get_fundamentals: 
 
-Note that we use stock names not stock symbols when fetching data. You can search for stock names by using
+```fundamentals = stock.get_fundamentals()```
 
-```stocks.search_stock("bmw", limit = 3)```
+Data will be returned in form of an pandas Dataframe
 
-This will print the three most matching stock names for your search. You can increase the limit to 30. If you don't give a parameter, all available data will be printed (up to 30).
+### Update fundamentals
+
+To update the fundamentals just call the update_fundamentals function.
+
+```stock.update_fundamentals()```
+
+## Estimates
+### Get estimates
+You can retrieve the estimates from an given stock.Stock object by calling get_estimates: 
+
+```estimates = stock.get_estimates()```
+
+Data will be returned in form of an pandas Dataframe
+
+### Update estimates
+To update the estimates just call the update_estimates function.
+
+```stock.update_estimates()```
+
+## Current stock quotes 
+### Get current stock quote 
+You can retrieve the current quotes from an given stock.Stock object by calling get_quotes: 
+
+```quotes = stock.get_quotes()```
+
+Data will be returned in form of an pandas Dataframe
+
+### Update current stock quotes 
+To update the current stock quotes just call the update_quotes function.
+
+```stock.update_quotes()```
+
+## Search Stock
+To get the correct name for an stock you can use the search_stock function.
+
+The function accepts the stock as string and an number of results. 
+The result number is optional. Search stocks without number of results will return all 
+results found. 
+
+ex. ```stock_names = finanzen_net.helpers.search_stock("telekom", 5)``` 
+
+Data will be returned in form of an pandas Dataframe which will have the following columns: 
+- name
+- fn_stock_name
+- isin
+- wkn
